@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Case File: Dehumanization</title>
+  <meta name="description" content="A mind map tracing how dehumanization connects to Indigenous peoples, Black Canadians, and mental health." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='12' r='9' fill='%23a3241e'/%3E%3Crect x='15' y='18' width='2' height='12' fill='%23888'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Top case-file tabs -->
+  <header class="topbar">
+    <button class="case-title" id="caseTitle" title="Show the whole board">
+      <span class="case-no" id="boardSubtitle">Case File</span>
+      <span class="case-name" id="boardTitle">Dehumanization</span>
+    </button>
+    <nav class="tabs" id="tabs" aria-label="Topics"></nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="soundBtn" title="Room ambience" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" id="lockBtn" title="Owner: unlock editing">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5" fill="currentColor"/><path id="shackle" d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Board viewport -->
+  <main class="viewport" id="viewport">
+    <div class="world" id="world">
+      <div class="frame" id="frame"><div class="cork"></div></div>
+      <div class="nodes" id="nodes"></div>
+      <svg class="strings" id="strings" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="labels" id="labels"></div>
+    </div>
+  </main>
+
+  <!-- Atmosphere layers -->
+  <div class="lamp-light" aria-hidden="true"></div>
+  <div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
+  <canvas class="dust" id="dust" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="desk" aria-hidden="true">
+    <svg class="lamp" viewBox="0 0 120 170">
+      <defs>
+        <radialGradient id="flame" cx="50%" cy="60%" r="50%">
+          <stop offset="0%" stop-color="#fff6d8"/><stop offset="45%" stop-color="#ffc867"/><stop offset="100%" stop-color="#ff8a2a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="glass" x1="0" x2="1"><stop offset="0" stop-color="#f3d9a0" stop-opacity=".18"/><stop offset=".5" stop-color="#fff0c8" stop-opacity=".38"/><stop offset="1" stop-color="#f3d9a0" stop-opacity=".12"/></linearGradient>
+      </defs>
+      <ellipse cx="60" cy="162" rx="44" ry="7" fill="#0b0705" opacity=".8"/>
+      <path d="M22 160h76l-8-16H30z" fill="#2c1d12"/>
+      <path d="M34 144h52l-6-14H40z" fill="#3b2817"/>
+      <rect x="44" y="120" width="32" height="10" rx="2" fill="#4a3220"/>
+      <path d="M46 120c-14-16-14-48 2-66h24c16 18 16 50 2 66z" fill="url(#glass)" stroke="#d8b47a" stroke-opacity=".35"/>
+      <ellipse class="flame" cx="60" cy="96" rx="9" ry="20" fill="url(#flame)"/>
+      <path d="M50 54h20l-3-14H53z" fill="#3b2817"/>
+      <path d="M44 40h32" stroke="#4a3220" stroke-width="4" stroke-linecap="round"/>
+      <path d="M84 132c14 0 14-20 0-20" fill="none" stroke="#3b2817" stroke-width="4"/>
+    </svg>
+  </div>
+
+  <!-- Bottom-right map controls -->
+  <div class="map-controls">
+    <button class="icon-btn" id="zoomIn" title="Zoom in">+</button>
+    <button class="icon-btn" id="zoomOut" title="Zoom out">&minus;</button>
+    <button class="icon-btn" id="zoomFit" title="Fit board">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14.5 14.5 20 20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Evidence trail panel (shown when a topic is selected) -->
+  <aside class="trail" id="trail" hidden>
+    <div class="trail-head">
+      <span class="trail-kicker">Evidence trail</span>
+      <h2 id="trailTitle"></h2>
+      <button class="close" id="trailClose" aria-label="Close trail">&times;</button>
+    </div>
+    <ol id="trailList"></ol>
+  </aside>
+
+  <!-- Owner toolbar -->
+  <div class="toolbar" id="toolbar" hidden>
+    <span class="tool-label">Add</span>
+    <button data-add="note" title="Sticky note"><i class="ico ico-note"></i>Note</button>
+    <button data-add="photo" title="Polaroid photo"><i class="ico ico-photo"></i>Photo</button>
+    <button data-add="clip" title="Typed clipping"><i class="ico ico-clip"></i>Clipping</button>
+    <button data-add="hub" title="Topic index card"><i class="ico ico-hub"></i>Card</button>
+    <span class="sep"></span>
+    <button id="stringTool" title="Connect two items with string (S)"><i class="ico ico-string"></i>String</button>
+    <button id="undoBtn" title="Undo (Ctrl+Z)">Undo</button>
+    <button id="settingsBtn" title="Board title, topics, backup">Board</button>
+    <span class="sep"></span>
+    <span class="save-state" id="saveState">Saved</span>
+  </div>
+  <div class="hint" id="hint" hidden></div>
+
+  <!-- Editor drawer -->
+  <aside class="editor" id="editor" hidden></aside>
+
+  <!-- Modals -->
+  <div class="modal-backdrop" id="backdrop" hidden></div>
+
+  <dialog class="sheet inspect" id="inspectDlg"></dialog>
+
+  <dialog class="sheet works" id="worksDlg">
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <div class="sheet-paper">
+      <p class="stamp-small">Exhibit Z</p>
+      <h2>Works Cited</h2>
+      <div id="worksBody"></div>
+    </div>
+  </dialog>
+
+  <dialog class="sheet settings" id="settingsDlg">
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <div class="sheet-paper" id="settingsBody"></div>
+  </dialog>
+
+  <div class="loading" id="loading"><span>Pulling the case file&hellip;</span></div>
+
+  <script src="defaults.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

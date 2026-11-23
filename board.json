@@ -1,0 +1,394 @@
+{
+  "version": 1,
+  "title": "Dehumanization",
+  "subtitle": "Case File No. 11 · English",
+  "topics": [
+    {
+      "key": "indigenous",
+      "name": "Indigenous",
+      "color": "#d0813f"
+    },
+    {
+      "key": "black",
+      "name": "Black Canadian",
+      "color": "#c27591"
+    },
+    {
+      "key": "mental",
+      "name": "Mental Health",
+      "color": "#7fa9b0"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "core",
+      "type": "core",
+      "x": 1400,
+      "y": 905,
+      "rot": -1,
+      "title": "Dehumanization",
+      "text": "Denying people their full humanity: treating them as objects, problems, threats or numbers, so that harming, controlling or erasing them starts to seem acceptable."
+    },
+    {
+      "id": "thesis",
+      "type": "note",
+      "x": 1510,
+      "y": 610,
+      "rot": 3,
+      "color": "#e9d27a",
+      "title": "My thesis?",
+      "text": "Write your thesis here. Unlock the board, then click this note to edit it."
+    },
+    {
+      "id": "ind-hub",
+      "type": "hub",
+      "x": 600,
+      "y": 440,
+      "rot": -2,
+      "topic": "indigenous",
+      "title": "Indigenous Peoples",
+      "text": "Colonial policy in Canada tried to erase Indigenous identity, culture and self-determination."
+    },
+    {
+      "id": "ind-rs",
+      "type": "clip",
+      "x": 210,
+      "y": 170,
+      "rot": -3,
+      "topic": "indigenous",
+      "title": "Residential Schools",
+      "text": "1880s to 1996. More than 150,000 First Nations, Inuit and Métis children were taken from their families. Languages were forbidden and children were punished for speaking them."
+    },
+    {
+      "id": "ind-act",
+      "type": "clip",
+      "x": 700,
+      "y": 120,
+      "rot": 2,
+      "topic": "indigenous",
+      "title": "The Indian Act, 1876",
+      "text": "The government decided who legally counted as 'Indian' and banned ceremonies like the potlatch from 1884 to 1951."
+    },
+    {
+      "id": "ind-dcs",
+      "type": "note",
+      "x": 170,
+      "y": 650,
+      "rot": 4,
+      "topic": "indigenous",
+      "color": "#e8a7a0",
+      "title": "“The Indian problem”",
+      "text": "“I want to get rid of the Indian problem.” Duncan Campbell Scott, 1920. People reduced to a problem to be solved."
+    },
+    {
+      "id": "ind-60s",
+      "type": "photo",
+      "x": 450,
+      "y": 840,
+      "rot": -4,
+      "topic": "indigenous",
+      "title": "Sixties Scoop",
+      "text": "Thousands of Indigenous children were taken into care and adopted into non-Indigenous homes, cut off from family and culture."
+    },
+    {
+      "id": "ind-mmiwg",
+      "type": "note",
+      "x": 880,
+      "y": 760,
+      "rot": -2,
+      "topic": "indigenous",
+      "color": "#e9d27a",
+      "title": "MMIWG",
+      "text": "Missing and Murdered Indigenous Women and Girls. The 2019 National Inquiry called the violence a genocide."
+    },
+    {
+      "id": "blk-hub",
+      "type": "hub",
+      "x": 2300,
+      "y": 440,
+      "rot": 2,
+      "topic": "black",
+      "title": "Black Canadians",
+      "text": "Anti-Black racism in Canada is often hidden behind the story that Canada was only ever a safe haven."
+    },
+    {
+      "id": "blk-slav",
+      "type": "clip",
+      "x": 2700,
+      "y": 160,
+      "rot": 3,
+      "topic": "black",
+      "title": "Slavery in Canada",
+      "text": "Enslaved Black people were bought and sold in New France and British North America until slavery was abolished in 1834."
+    },
+    {
+      "id": "blk-afv",
+      "type": "photo",
+      "x": 2060,
+      "y": 110,
+      "rot": -3,
+      "topic": "black",
+      "title": "Africville, Halifax",
+      "text": "A Black community denied city services for decades, then demolished in the 1960s. Residents were relocated, some of them in garbage trucks."
+    },
+    {
+      "id": "blk-viola",
+      "type": "note",
+      "x": 2790,
+      "y": 640,
+      "rot": -4,
+      "topic": "black",
+      "color": "#a9c6cf",
+      "title": "Viola Desmond, 1946",
+      "text": "Arrested and jailed for sitting in the whites-only section of a theatre in New Glasgow, Nova Scotia."
+    },
+    {
+      "id": "blk-card",
+      "type": "clip",
+      "x": 2380,
+      "y": 840,
+      "rot": 2,
+      "topic": "black",
+      "title": "Carding & street checks",
+      "text": "Black people were stopped and documented by police far more often than white people. They were treated as suspects first and people second."
+    },
+    {
+      "id": "mh-hub",
+      "type": "hub",
+      "x": 1480,
+      "y": 1470,
+      "rot": -1,
+      "topic": "mental",
+      "title": "Mental Health",
+      "text": "People living with mental illness have been labelled, locked away and talked about as less than whole people."
+    },
+    {
+      "id": "mh-asy",
+      "type": "clip",
+      "x": 860,
+      "y": 1440,
+      "rot": -2,
+      "topic": "mental",
+      "title": "Asylums & institutions",
+      "text": "Patients were isolated from society and stripped of their rights, privacy and control over their own lives."
+    },
+    {
+      "id": "mh-lang",
+      "type": "note",
+      "x": 1150,
+      "y": 1780,
+      "rot": 3,
+      "topic": "mental",
+      "color": "#bccf9a",
+      "title": "Language",
+      "text": "“Crazy.” “Psycho.” “Insane.” Words like these turn a person into a label."
+    },
+    {
+      "id": "mh-stig",
+      "type": "photo",
+      "x": 2000,
+      "y": 1500,
+      "rot": 4,
+      "topic": "mental",
+      "title": "Stigma",
+      "text": "Shame and fear stop people from getting help. Illness is seen as weakness or danger instead of something to treat."
+    },
+    {
+      "id": "mh-inter",
+      "type": "note",
+      "x": 560,
+      "y": 1150,
+      "rot": -3,
+      "topic": "mental",
+      "color": "#e9d27a",
+      "title": "Intergenerational trauma",
+      "text": "The trauma of residential schools still affects the mental health of survivors' children and grandchildren."
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "from": "ind-hub",
+      "to": "core",
+      "label": "colonial erasure"
+    },
+    {
+      "id": "l2",
+      "from": "blk-hub",
+      "to": "core",
+      "label": "anti-Black racism"
+    },
+    {
+      "id": "l3",
+      "from": "mh-hub",
+      "to": "core",
+      "label": "stigma & exclusion"
+    },
+    {
+      "id": "l4",
+      "from": "thesis",
+      "to": "core"
+    },
+    {
+      "id": "l10",
+      "from": "ind-rs",
+      "to": "ind-hub"
+    },
+    {
+      "id": "l11",
+      "from": "ind-act",
+      "to": "ind-hub"
+    },
+    {
+      "id": "l12",
+      "from": "ind-dcs",
+      "to": "ind-hub"
+    },
+    {
+      "id": "l13",
+      "from": "ind-60s",
+      "to": "ind-hub"
+    },
+    {
+      "id": "l14",
+      "from": "ind-mmiwg",
+      "to": "ind-hub"
+    },
+    {
+      "id": "l15",
+      "from": "ind-rs",
+      "to": "core",
+      "label": "stripped of name, language, family"
+    },
+    {
+      "id": "l16",
+      "from": "ind-act",
+      "to": "core",
+      "label": "identity controlled by law"
+    },
+    {
+      "id": "l17",
+      "from": "ind-dcs",
+      "to": "core",
+      "label": "people as a 'problem'"
+    },
+    {
+      "id": "l18",
+      "from": "ind-60s",
+      "to": "core",
+      "label": "children treated as removable"
+    },
+    {
+      "id": "l19",
+      "from": "ind-mmiwg",
+      "to": "core",
+      "label": "lives treated as less valuable"
+    },
+    {
+      "id": "l20",
+      "from": "blk-slav",
+      "to": "blk-hub"
+    },
+    {
+      "id": "l21",
+      "from": "blk-afv",
+      "to": "blk-hub"
+    },
+    {
+      "id": "l22",
+      "from": "blk-viola",
+      "to": "blk-hub"
+    },
+    {
+      "id": "l23",
+      "from": "blk-card",
+      "to": "blk-hub"
+    },
+    {
+      "id": "l24",
+      "from": "blk-slav",
+      "to": "core",
+      "label": "people owned as property"
+    },
+    {
+      "id": "l25",
+      "from": "blk-afv",
+      "to": "core",
+      "label": "community treated as disposable"
+    },
+    {
+      "id": "l26",
+      "from": "blk-viola",
+      "to": "core",
+      "label": "denied an equal place"
+    },
+    {
+      "id": "l27",
+      "from": "blk-card",
+      "to": "core",
+      "label": "seen as a threat, not a person"
+    },
+    {
+      "id": "l30",
+      "from": "mh-asy",
+      "to": "mh-hub"
+    },
+    {
+      "id": "l31",
+      "from": "mh-lang",
+      "to": "mh-hub"
+    },
+    {
+      "id": "l32",
+      "from": "mh-stig",
+      "to": "mh-hub"
+    },
+    {
+      "id": "l33",
+      "from": "mh-inter",
+      "to": "mh-hub"
+    },
+    {
+      "id": "l34",
+      "from": "mh-asy",
+      "to": "core",
+      "label": "locked away from society"
+    },
+    {
+      "id": "l35",
+      "from": "mh-lang",
+      "to": "core",
+      "label": "a person becomes a label"
+    },
+    {
+      "id": "l36",
+      "from": "mh-stig",
+      "to": "core",
+      "label": "seen as dangerous or weak"
+    },
+    {
+      "id": "l37",
+      "from": "mh-inter",
+      "to": "ind-rs",
+      "label": "harm passed down"
+    }
+  ],
+  "works": [
+    {
+      "id": "w1",
+      "text": "Goffman, Erving. *Asylums: Essays on the Social Situation of Mental Patients and Other Inmates.* Anchor Books, 1961."
+    },
+    {
+      "id": "w2",
+      "text": "Maynard, Robyn. *Policing Black Lives: State Violence in Canada from Slavery to the Present.* Fernwood Publishing, 2017."
+    },
+    {
+      "id": "w3",
+      "text": "National Inquiry into Missing and Murdered Indigenous Women and Girls. *Reclaiming Power and Place: The Final Report of the National Inquiry into Missing and Murdered Indigenous Women and Girls.* 2019."
+    },
+    {
+      "id": "w4",
+      "text": "Truth and Reconciliation Commission of Canada. *Honouring the Truth, Reconciling for the Future: Summary of the Final Report of the Truth and Reconciliation Commission of Canada.* 2015."
+    }
+  ]
+}
