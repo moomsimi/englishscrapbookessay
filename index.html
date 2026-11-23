@@ -20,6 +20,11 @@
     </button>
     <nav class="tabs" id="tabs" aria-label="Topics"></nav>
     <div class="top-actions">
+      <div class="search" id="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14.5 14.5 20 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="search" placeholder="Find anything…  ( / )" autocomplete="off" spellcheck="false" aria-label="Search the board" aria-controls="searchResults" />
+        <div class="search-results" id="searchResults" role="listbox" hidden></div>
+      </div>
       <button class="icon-btn" id="soundBtn" title="Room ambience" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
@@ -87,6 +92,7 @@
   <!-- Owner toolbar -->
   <div class="toolbar" id="toolbar" hidden>
     <span class="tool-label">Add</span>
+    <button data-add="tag" title="Title tag: just a heading on the board, details open on click"><i class="ico ico-tag"></i>Title</button>
     <button data-add="note" title="Sticky note"><i class="ico ico-note"></i>Note</button>
     <button data-add="photo" title="Polaroid photo"><i class="ico ico-photo"></i>Photo</button>
     <button data-add="clip" title="Typed clipping"><i class="ico ico-clip"></i>Clipping</button>

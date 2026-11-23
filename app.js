@@ -3,10 +3,11 @@
 
   /* ================= constants & state ================= */
   const WORLD = { w: 3200, h: 2100 };
-  const WIDTH = { core: 400, hub: 270, note: 200, photo: 220, clip: 250 };
-  const TYPE_NAMES = { core: "Case file", hub: "Index card", note: "Sticky note", photo: "Polaroid", clip: "Clipping" };
+  const WIDTH = { core: 400, hub: 270, note: 200, photo: 220, clip: 250, tag: 220 };
+  const TYPE_NAMES = { core: "Case file", hub: "Index card", note: "Sticky note", photo: "Polaroid", clip: "Clipping", tag: "Title tag" };
   const NOTE_COLORS = ["#e9d27a", "#e8a7a0", "#a9c6cf", "#bccf9a", "#efe6d2", "#d9b8d8"];
   const RED = "#a3241e";
+  const TOPIC_COLORS = ["#8fae5a", "#6f8fd0", "#b575c9", "#d4b04a", "#d06a6a", "#5fb3a1", "#c98a5a", "#7c86d8"];
   const DRAFT_KEY = "pinboard-draft-v1";
 
   const $ = (s, r = document) => r.querySelector(s);
@@ -33,6 +34,8 @@
   const topicByKey = (k) => board.topics.find((t) => t.key === k);
   const topicColor = (n) => (n.type === "core" ? RED : topicByKey(n.topic)?.color || RED);
   const isCore = (n) => n && n.type === "core";
+  /* Title tags always show just their title. Other cards can be switched to title-only. */
+  const isCollapsed = (n) => n.type === "tag" || (!!n.collapsed && n.type !== "core" && n.type !== "photo");
   const safeImg = (u) => (typeof u === "string" && (/^images\/[\w.\-\/]+$/.test(u) || /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(u) || /^https:\/\/[^\s"'()\\]+$/.test(u)) ? u : "");
   const richText = (s) => esc(s).replace(/\*(.+?)\*/g, "<i>$1</i>").replace(/(https?:\/\/[^\s<]+)/g, (u) => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
   const sizeOf = (n) => clamp(Number(n.s) || 1, 0.4, 3.5);
@@ -50,7 +53,7 @@
     const d = structuredClone(window.DEFAULT_BOARD);
     if (!b || typeof b !== "object") return d;
     const out = { ...d, ...b };
-    out.topics = Array.isArray(b.topics) && b.topics.length ? b.topics : d.topics;
+    out.topics = Array.isArray(b.topics) ? b.topics : d.topics;
     out.nodes = Array.isArray(b.nodes) ? b.nodes : d.nodes;
     out.links = Array.isArray(b.links) ? b.links.filter((l) => out.nodes.some((n) => n.id === l.from) && out.nodes.some((n) => n.id === l.to)) : [];
     out.works = Array.isArray(b.works) ? b.works : [];
@@ -66,12 +69,14 @@
     const tabs = $("#tabs");
     tabs.innerHTML = board.topics.map((t) =>
       `<button class="tab${focus === t.key ? " active" : ""}" data-topic="${esc(t.key)}" style="--c:${esc(t.color)}" aria-pressed="${focus === t.key}">${esc(t.name)}</button>`
-    ).join("") + `<button class="tab works" data-works>Works Cited</button>`;
+    ).join("") + (owner ? `<button class="tab add" data-add-topic title="Add a new topic">+ Topic</button>` : "") + `<button class="tab works" data-works>Works Cited</button>`;
   }
 
   function faceHTML(n) {
     const title = `<h3>${esc(n.title || "")}</h3>`;
-    const text = `<p>${esc(n.text || "")}</p>`;
+    const text = isCollapsed(n)
+      ? ((n.text || "").trim() ? '<i class="more" aria-hidden="true">+ more</i>' : "")
+      : `<p>${esc(n.text || "")}</p>`;
     if (n.type === "photo") {
       const img = safeImg(n.img);
       return `<div class="face"><div class="img${img ? " has" : ""}"${img ? ` style="background-image:url('${img}')"` : ""}>${img ? "" : "<span>?</span>"}</div>${title}${text}</div>`;
@@ -91,7 +96,9 @@
     el.className = `node ${n.type}`;
     el.dataset.id = n.id;
     el.style.setProperty("--tc", topicColor(n));
-    if (n.type === "note") el.style.setProperty("--nc", n.color || NOTE_COLORS[0]);
+    if (n.type === "note" || n.type === "tag") el.style.setProperty("--nc", n.color || NOTE_COLORS[0]);
+    if (isCollapsed(n)) el.classList.add("collapsed");
+    if (n.topic) el.classList.add("has-topic");
     el.setAttribute("role", "button");
     el.setAttribute("tabindex", "0");
     el.setAttribute("aria-label", `${TYPE_NAMES[n.type] || "Card"}: ${n.title || "untitled"}`);
@@ -332,12 +339,34 @@
     }).join("");
   }
 
+  function pulseNode(id) {
+    const el = els.get(id);
+    if (!el) return;
+    el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse");
+    setTimeout(() => el.classList.remove("pulse"), 3600);
+  }
+
   function gotoNode(id) {
     const steps = pathToCore(id) || [];
     const ids = [id, ...steps.map((s) => s.id)];
     fitBox(boxOf(ids), true, 1.2);
-    const el = els.get(id);
-    if (el) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); setTimeout(() => el.classList.remove("pulse"), 3000); }
+    pulseNode(id);
+  }
+
+  /* Fly straight to one card and make it glow. Used by search. */
+  function findNode(id) {
+    const n = nodeById(id);
+    if (!n) return;
+    if (focus && !focusSets().litNodes.has(id)) {
+      focus = null;
+      window.history.replaceState(null, "", location.pathname + location.search);
+      $("#trail").hidden = true;
+      renderTabs();
+      applyStates();
+    }
+    if (owner && tool === "select") select({ kind: "node", id });
+    fitBox(boxOf([id]), true, 1.0);
+    pulseNode(id);
   }
 
   /* ================= pointer interactions ================= */
@@ -519,6 +548,7 @@
     $("#toolbar").hidden = !on;
     $("#lockBtn").classList.toggle("unlocked", on);
     $("#lockBtn").title = on ? "Lock the board (stop editing)" : "Owner: unlock editing";
+    renderTabs();
     if (!on) { select(null); setTool("select"); }
     applyStates();
   }
@@ -529,22 +559,46 @@
     renderEditor();
   }
 
+  /* Find the empty patch of cork closest to (cx, cy) so new cards never land on top of old ones. */
+  function freeSpot(w, h, cx, cy) {
+    const rects = [];
+    for (const n of board.nodes) {
+      const el = els.get(n.id);
+      if (!el) continue;
+      const s = sizeOf(n), ow = el.offsetWidth, oh = el.offsetHeight, m = 24;
+      rects.push({ x: n.x + ow / 2 - (ow * s) / 2 - m, y: n.y + 12 - 12 * s - m, w: ow * s + 2 * m, h: oh * s + 2 * m });
+    }
+    const hit = (x, y) => rects.some((r) => x < r.x + r.w && x + w > r.x && y < r.y + r.h && y + h > r.y);
+    let best = null, bd = Infinity;
+    for (let y = 60; y <= WORLD.h - h - 60; y += 40) {
+      for (let x = 60; x <= WORLD.w - w - 60; x += 40) {
+        const d = Math.hypot(x + w / 2 - cx, y + h / 2 - cy);
+        if (d < bd && !hit(x, y)) { bd = d; best = { x, y }; }
+      }
+    }
+    return best;
+  }
+
   function addNode(type, x, y) {
     checkpoint(true);
     if (x === undefined) {
       const a = safeArea();
       const c = toWorld((a.left + a.right) / 2, (a.top + a.bottom) / 2);
-      x = c.x - (WIDTH[type] || 220) / 2 + (Math.random() * 80 - 40);
-      y = c.y - 80 + (Math.random() * 60 - 30);
+      const spot = freeSpot(WIDTH[type] || 220, type === "tag" ? 90 : 230, c.x, c.y);
+      if (spot) { x = spot.x; y = spot.y; }
+      else {
+        x = c.x - (WIDTH[type] || 220) / 2 + (Math.random() * 80 - 40);
+        y = c.y - 80 + (Math.random() * 60 - 30);
+      }
     }
     const n = {
       id: uid("n"), type, x: Math.round(clamp(x, 30, WORLD.w - 300)), y: Math.round(clamp(y, 30, WORLD.h - 200)),
       rot: Math.round((Math.random() * 8 - 4) * 10) / 10,
-      title: { note: "New note", photo: "New photo", clip: "New clipping", hub: "New card" }[type] || "New",
+      title: { note: "New note", photo: "New photo", clip: "New clipping", hub: "New card", tag: "New title" }[type] || "New",
       text: "",
       topic: focus || "",
     };
-    if (type === "note") n.color = NOTE_COLORS[Math.floor(Math.random() * 4)];
+    if (type === "note" || type === "tag") n.color = NOTE_COLORS[Math.floor(Math.random() * 4)];
     board.nodes.push(n);
     const el = buildNode(n);
     els.set(n.id, el);
@@ -593,11 +647,12 @@
     ed.innerHTML = `
       <button class="close" data-ed-close aria-label="Close">&times;</button>
       <h2>${esc(TYPE_NAMES[n.type])}</h2>
-      ${isCore(n) ? "" : `<label class="field"><span>Kind</span><select data-f="type">${["note", "photo", "clip", "hub"].map((t) => `<option value="${t}"${n.type === t ? " selected" : ""}>${TYPE_NAMES[t]}</option>`).join("")}</select></label>`}
+      ${isCore(n) ? "" : `<label class="field"><span>Kind</span><select data-f="type">${["note", "photo", "clip", "hub", "tag"].map((t) => `<option value="${t}"${n.type === t ? " selected" : ""}>${TYPE_NAMES[t]}</option>`).join("")}</select></label>`}
       <label class="field"><span>Title</span><input type="text" data-f="title" value="${esc(n.title || "")}" /></label>
-      <label class="field"><span>${n.type === "photo" ? "Notes (shown when opened)" : "Text"}</span><textarea data-f="text">${esc(n.text || "")}</textarea></label>
+      <label class="field"><span>${n.type === "photo" || isCollapsed(n) ? "Details (shown when clicked)" : "Text"}</span><textarea data-f="text">${esc(n.text || "")}</textarea></label>
       ${isCore(n) ? "" : `<label class="field"><span>Topic</span><select data-f="topic"><option value="">None</option>${board.topics.map((t) => `<option value="${esc(t.key)}"${n.topic === t.key ? " selected" : ""}>${esc(t.name)}</option>`).join("")}</select></label>`}
-      ${n.type === "note" ? `<div class="field"><span>Paper colour</span><div class="swatches">${NOTE_COLORS.map((c) => `<button class="swatch${(n.color || NOTE_COLORS[0]) === c ? " on" : ""}" data-color="${c}" style="background:${c}" aria-label="Colour ${c}"></button>`).join("")}</div></div>` : ""}
+      ${["core", "photo", "tag"].includes(n.type) ? "" : `<label class="field check"><input type="checkbox" data-f="collapsed"${n.collapsed ? " checked" : ""} /><span>Title only on the board</span></label>`}
+      ${n.type === "note" || n.type === "tag" ? `<div class="field"><span>Paper colour</span><div class="swatches">${NOTE_COLORS.map((c) => `<button class="swatch${(n.color || NOTE_COLORS[0]) === c ? " on" : ""}" data-color="${c}" style="background:${c}" aria-label="Colour ${c}"></button>`).join("")}</div></div>` : ""}
       ${n.type === "photo" ? `<div class="field"><span>Photo</span>
           <div class="thumb" style="${safeImg(n.img) ? `background-image:url('${safeImg(n.img)}')` : ""}"></div>
           <div class="row"><label class="btn" style="cursor:pointer">Upload image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-upload hidden /></label>${n.img ? `<button class="btn" data-clear-img>Remove</button>` : ""}</div>
@@ -644,6 +699,7 @@
     checkpoint();
     if (f === "s") { n.s = Number(t.value); placeNode(n); renderLinks(); scheduleSave(); return; }
     if (f === "rot") { n.rot = Number(t.value); placeNode(n); renderLinks(); scheduleSave(); return; }
+    if (f === "collapsed") { n.collapsed = t.checked; refreshNode(n.id); scheduleSave(); renderEditor(); return; }
     if (f === "img") {
       const v = t.value.trim();
       if (v && !safeImg(v)) { t.setCustomValidity("Use an https:// link to an image"); t.reportValidity(); return; }
@@ -841,6 +897,43 @@
     if (del) { checkpoint(true); board.works = board.works.filter((w) => w.id !== del.dataset.delWork); scheduleSave(); renderWorks(); }
   });
 
+  function addTopic() {
+    if (!owner) return;
+    checkpoint(true);
+    const used = new Set(board.topics.map((t) => String(t.color).toLowerCase()));
+    const color = TOPIC_COLORS.find((c) => !used.has(c)) || "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
+    const key = uid("t");
+    board.topics.push({ key, name: "New topic", color });
+    const a = safeArea(), c = toWorld((a.left + a.right) / 2, (a.top + a.bottom) / 2);
+    const spot = freeSpot(WIDTH.hub, 240, c.x, c.y);
+    const hub = {
+      id: uid("n"), type: "hub", topic: key, title: "New topic", text: "",
+      x: Math.round(spot ? spot.x : c.x - 135), y: Math.round(spot ? spot.y : c.y - 100),
+      rot: Math.round((Math.random() * 4 - 2) * 10) / 10,
+    };
+    board.nodes.push(hub);
+    const core = board.nodes.find(isCore);
+    if (core) board.links.push({ id: uid("l"), from: hub.id, to: core.id, label: "" });
+    renderAll();
+    scheduleSave();
+    openSettings();
+    const inp = $$("#settingsBody [data-tn]").at(-1);
+    inp?.focus(); inp?.select();
+  }
+
+  function deleteTopic(i) {
+    const t = board.topics[i];
+    if (!t || !confirm(`Delete the topic "${t.name}"? Its cards stay on the board, just un-tagged.`)) return;
+    checkpoint(true);
+    if (focus === t.key) setFocus(null);
+    for (const n of board.nodes) if (n.topic === t.key) n.topic = "";
+    board.topics.splice(i, 1);
+    renderAll();
+    scheduleSave();
+    renderEditor();
+    openSettings();
+  }
+
   function openSettings() {
     const b = $("#settingsBody");
     b.innerHTML = `
@@ -849,8 +942,9 @@
       <label class="field"><span>Title</span><input type="text" data-s="title" value="${esc(board.title || "")}" /></label>
       <label class="field"><span>Subtitle</span><input type="text" data-s="subtitle" value="${esc(board.subtitle || "")}" /></label>
       <h3>Topic tabs</h3>
-      ${board.topics.map((t, i) => `<div class="topic-row"><input type="color" data-tc="${i}" value="${esc(t.color)}" aria-label="${esc(t.name)} colour" /><input type="text" data-tn="${i}" value="${esc(t.name)}" aria-label="Topic name" /></div>`).join("")}
-      <p class="muted">Tag a card with a topic so it lights up when someone clicks that tab.</p>
+      ${board.topics.map((t, i) => `<div class="topic-row"><input type="color" data-tc="${i}" value="${esc(t.color)}" aria-label="${esc(t.name)} colour" /><input type="text" data-tn="${i}" value="${esc(t.name)}" aria-label="Topic name" /><button class="btn danger" data-del-topic="${i}" title="Delete this topic" aria-label="Delete topic ${esc(t.name)}">&times;</button></div>`).join("")}
+      <div class="row"><button class="btn" data-add-topic>+ Add topic</button></div>
+      <p class="muted">Each topic gets its own tab. A new topic also gets an index card on the board. Tag any card with a topic (pick it in the card editor) so it lights up when someone clicks that tab. Deleting a topic only un-tags its cards.</p>
       <h3>Publishing</h3>
       <p class="muted">Edits save in this browser only. To make them public: Download backup, rename the file to board.json, and upload it to your GitHub repo (replace the old one).</p>
       <h3>Backup</h3>
@@ -865,10 +959,19 @@
   $("#settingsBody").addEventListener("input", (e) => {
     const t = e.target;
     if (t.dataset.s) { checkpoint(); board[t.dataset.s] = t.value; renderTabs(); scheduleSave(); }
-    if (t.dataset.tn) { checkpoint(); board.topics[t.dataset.tn].name = t.value; renderTabs(); scheduleSave(); if (focus) renderTrail(); }
+    if (t.dataset.tn) {
+      checkpoint();
+      const tp = board.topics[t.dataset.tn], old = tp.name;
+      tp.name = t.value;
+      for (const n of board.nodes) if (n.type === "hub" && n.topic === tp.key && n.title === old) { n.title = t.value; refreshNode(n.id); }
+      renderTabs(); scheduleSave(); renderEditor(); if (focus) renderTrail();
+    }
     if (t.dataset.tc) { checkpoint(); board.topics[t.dataset.tc].color = t.value; renderAll(); scheduleSave(); }
   });
   $("#settingsBody").addEventListener("click", (e) => {
+    if (e.target.closest("[data-add-topic]")) return addTopic();
+    const delTopic = e.target.closest("[data-del-topic]");
+    if (delTopic) return deleteTopic(Number(delTopic.dataset.delTopic));
     if (e.target.closest("[data-export]")) {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(board, null, 2)], { type: "application/json" }));
@@ -898,11 +1001,100 @@
     } catch { toast("That file isn't a pinboard backup."); }
   });
 
+  /* ================= search / jump to ================= */
+  const searchInput = $("#searchInput"), searchBox = $("#searchResults");
+  let searchHits = [], searchIdx = 0;
+  const reEsc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  function mark(text, toks) {
+    if (!toks.length) return esc(text);
+    const re = new RegExp("(" + toks.map(reEsc).join("|") + ")", "gi");
+    return String(text).split(re).map((p, i) => (i % 2 ? `<mark>${esc(p)}</mark>` : esc(p))).join("");
+  }
+  function snippet(text, toks) {
+    const t = (text || "").replace(/\s+/g, " ").trim();
+    if (!t) return "";
+    const low = t.toLowerCase();
+    let at = -1;
+    for (const k of toks) { const i = low.indexOf(k); if (i >= 0 && (at < 0 || i < at)) at = i; }
+    const start = at > 30 ? at - 30 : 0;
+    return (start ? "…" : "") + t.slice(start, start + 90) + (start + 90 < t.length ? "…" : "");
+  }
+  function searchFor(q) {
+    const toks = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const hits = [];
+    if (!toks.length) {
+      for (const n of board.nodes) if (n.type === "tag") hits.push({ kind: "node", n, rank: 0 });
+      return { toks, hits, empty: true };
+    }
+    for (const t of board.topics) if (toks.every((k) => (t.name || "").toLowerCase().includes(k))) hits.push({ kind: "topic", t, rank: -1 });
+    for (const n of board.nodes) {
+      const title = (n.title || "").toLowerCase(), body = (n.text || "").toLowerCase(), tn = (topicByKey(n.topic)?.name || "").toLowerCase();
+      const all = `${title} ${body} ${tn}`;
+      if (!toks.every((k) => all.includes(k))) continue;
+      const inTitle = toks.every((k) => title.includes(k));
+      hits.push({ kind: "node", n, rank: inTitle ? (n.type === "tag" ? 0 : 1) : 2 });
+    }
+    hits.sort((a, b) => a.rank - b.rank);
+    return { toks, hits: hits.slice(0, 40), empty: false };
+  }
+  function renderSearch() {
+    const { toks, hits, empty } = searchFor(searchInput.value);
+    searchHits = hits; searchIdx = 0;
+    if (!hits.length) {
+      searchBox.innerHTML = `<p class="hit-none">${empty ? "Type to find any card, note or topic. Title tags you add are listed here as quick jumps." : "Nothing on the board matches that."}</p>`;
+    } else {
+      searchBox.innerHTML = (empty ? '<p class="hit-head">Jump to a section</p>' : "") + hits.map((h, i) => {
+        if (h.kind === "topic") {
+          return `<button class="hit" data-hit="${i}" role="option" type="button"><i class="hit-dot" style="--c:${esc(h.t.color)}"></i><span class="hit-main"><b>${mark(h.t.name, toks)}</b><em>Topic · opens its evidence trail</em></span></button>`;
+        }
+        const n = h.n, tp = topicByKey(n.topic);
+        return `<button class="hit" data-hit="${i}" role="option" type="button"><i class="hit-dot" style="--c:${esc(tp ? tp.color : "#8a7a62")}"></i><span class="hit-main"><b>${mark(n.title || "Untitled", toks)}</b><em>${esc(TYPE_NAMES[n.type] || "Card")}${tp ? " · " + esc(tp.name) : ""}</em><span class="hit-snip">${mark(snippet(n.text, toks), toks)}</span></span></button>`;
+      }).join("");
+    }
+    searchBox.hidden = false;
+    markActive();
+  }
+  function markActive() {
+    $$(".hit", searchBox).forEach((b, i) => {
+      b.classList.toggle("active", i === searchIdx);
+      if (i === searchIdx) b.scrollIntoView({ block: "nearest" });
+    });
+  }
+  function closeSearch() { searchBox.hidden = true; }
+  function openSearch() { searchInput.focus(); searchInput.select(); }
+  function pickHit(i) {
+    const h = searchHits[i];
+    if (!h) return;
+    searchInput.value = "";
+    closeSearch();
+    searchInput.blur();
+    if (h.kind === "topic") setFocus(h.t.key);
+    else findNode(h.n.id);
+  }
+  searchInput.addEventListener("focus", renderSearch);
+  searchInput.addEventListener("input", renderSearch);
+  searchInput.addEventListener("blur", closeSearch);
+  searchBox.addEventListener("mousedown", (e) => e.preventDefault());
+  searchBox.addEventListener("click", (e) => { const b = e.target.closest("[data-hit]"); if (b) pickHit(Number(b.dataset.hit)); });
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!searchHits.length) return;
+      searchIdx = (searchIdx + (e.key === "ArrowDown" ? 1 : -1) + searchHits.length) % searchHits.length;
+      markActive();
+    } else if (e.key === "Enter") { e.preventDefault(); pickHit(searchIdx); }
+    else if (e.key === "Escape") {
+      e.stopPropagation();
+      if (searchInput.value) { searchInput.value = ""; renderSearch(); } else searchInput.blur();
+    }
+  });
+
   /* ================= top-level buttons & keys ================= */
   $("#tabs").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
     if (b.dataset.works !== undefined) return openWorks();
+    if (b.dataset.addTopic !== undefined) return addTopic();
     setFocus(focus === b.dataset.topic ? null : b.dataset.topic);
   });
   $("#caseTitle").addEventListener("click", () => setFocus(null));
@@ -929,6 +1121,8 @@
       if (selected) return select(null);
       if (focus) return setFocus(null);
     }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); openSearch(); return; }
+    if (!typing && e.key === "/") { e.preventDefault(); openSearch(); return; }
     if (typing || !owner) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
     else if ((e.key === "Delete" || e.key === "Backspace") && selected) { e.preventDefault(); deleteSelected(); }
